@@ -42,14 +42,12 @@ pipeline {
         }
         stage('Maven Build') {
             steps {
-                script {
-                    try {
-                        container('maven') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    container('maven') {
+                        script {
+                            echo "Iniciando la etapa de Maven Build"
                             sh 'mvn package'
                         }
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Maven Build: ${ex.getMessage()}"
-                        error("La etapa Maven Build ha fallado")
                     }
                 }
             }
@@ -69,9 +67,12 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('maven') {
-                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl apply -f deployment.yaml'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    container('maven') {
+                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                            echo "Desplegando en Kubernetes"
+                            sh 'kubectl apply -f deployment.yaml'
+                        }
                     }
                 }
             }
