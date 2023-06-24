@@ -1,76 +1,69 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            // Configuración del agente de Kubernetes
+            label 'kubernetes'
+            yaml """
+                // Configuración YAML para el pod de Kubernetes
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  labels:
+                    app: my-app
+                spec:
+                  containers:
+                  - name: maven
+                    image: maven:3.8.1-openjdk-11
+                    command:
+                    - sleep
+                    - infinity
+            """
+        }
+    }
     stages {
         stage('Create Namespace') {
             steps {
                 script {
-                    try {
-                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        try {
                             sh "kubectl get namespace kubernetesdev"
+                        } catch (Exception ex) {
+                            sh "kubectl create namespace kubernetesdev"
                         }
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Create Namespace: ${ex.getMessage()}"
-                        error("La etapa Create Namespace ha fallado")
                     }
                 }
             }
         }
         stage('Checkout') {
             steps {
-                script {
-                    try {
-                        git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Checkout: ${ex.getMessage()}"
-                        error("La etapa Checkout ha fallado")
-                    }
-                }
+                git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
             }
         }
         stage('Maven Build') {
             steps {
-                script {
-                    try {
-                        container('maven') {
-                            sh 'mvn package'
-                        }
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Maven Build: ${ex.getMessage()}"
-                        error("La etapa Maven Build ha fallado")
-                    }
+                container('maven') {
+                    sh 'mvn package'
                 }
             }
         }
         stage('Docker Build and Push') {
             steps {
-                script {
-                    try {
-                        container('docker') {
-                            withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                                docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                    docker.build("${DOCKERHUB_USER}/my-app").push('latest')
-                                }
+                container('docker') {
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
                             }
                         }
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Docker Build and Push: ${ex.getMessage()}"
-                        error("La etapa Docker Build and Push ha fallado")
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    try {
-                        container('maven') {
-                            withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                                sh 'kubectl apply -f deployment.yaml'
-                            }
-                        }
-                    } catch (Exception ex) {
-                        echo "Error en la etapa Deploy to Kubernetes: ${ex.getMessage()}"
-                        error("La etapa Deploy to Kubernetes ha fallado")
+                container('maven') {
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f deployment.yaml'
                     }
                 }
             }
