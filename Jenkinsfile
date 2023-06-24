@@ -52,7 +52,7 @@ pipeline {
                 container('maven') {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
                         try {
-                            sh 'kubectl apply -f /var/jenkins_home/workspace/eCommerce-JavaBackend/path/to/deployment.yaml'
+                            sh 'kubectl apply -f path/to/deployment.yaml'
                         } catch (Exception ex) {
                             // Maneja el error de Deploy to Kubernetes aquí
                             error('El despliegue a Kubernetes ha fallado')
