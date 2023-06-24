@@ -1,24 +1,22 @@
 pipeline {
     agent {
         kubernetes {
-            // Configuración del agente de Kubernetes
             label 'kubernetes'
             inheritFrom 'docker'
             yaml """
-                // Configuración YAML para el pod de Kubernetes
-                apiVersion: v1
-                kind: Pod
-                metadata:
-                  labels:
-                    app: my-app
-                spec:
-                  containers:
-                  - name: maven
-                    image: maven:3.8.1-openjdk-11
-                    command:
-                    - sleep
-                    - infinity
-            """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: my-app
+spec:
+  containers:
+  - name: maven
+    image: maven:3.8.1-openjdk-11
+    command:
+    - sleep
+    - infinity
+"""
         }
     }
     stages {
