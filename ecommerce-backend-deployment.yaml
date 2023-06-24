@@ -19,7 +19,7 @@ spec:
             - containerPort: 8080
           env:
             - name: DATABASE_URL
-              value: <URL-de-la-base-de-datos>
+              value: jdbc:mysql://localhost:3306/mydatabase
           resources:
             limits:
               cpu: "1"
