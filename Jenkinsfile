@@ -1,5 +1,7 @@
 pipeline {
-    agent none
+    agent {
+        label 'jenkins-agent'
+    }
     stages {
         stage('Create Namespace') {
             steps {
@@ -12,12 +14,10 @@ pipeline {
                 }
             }
         }
-        stage('Run Pipeline') {
+        stage('Build') {
             agent {
                 kubernetes {
                     // Utiliza un pod de Kubernetes con Maven y Docker
-                    inheritFrom 'eCommerce-JavaBackend'
-                    namespace 'kubernetes-Dev'
                     yaml """
 apiVersion: v1
 kind: Pod
@@ -43,35 +43,39 @@ spec:
 """
                 }
             }
-            stages {
+            steps {
                 stage('Checkout') {
                     steps {
                         // Clona tu repositorio
                         git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
                     }
                 }
-                stage('Build') {
+                stage('Maven Build') {
                     steps {
-                        // Construye tu proyecto con Maven
                         container('maven') {
+                            // Construye tu proyecto con Maven
                             sh 'mvn package'
                         }
                     }
                 }
                 stage('Docker Build and Push') {
                     steps {
-                        // Construye y sube tu imagen de Docker. Asegúrate de tener las variables de entorno DOCKERHUB_USER y DOCKERHUB_PASS
                         container('docker') {
-                            script {
-                                docker.build("$DOCKERHUB_USER/my-app").push()
+                            // Construye y sube tu imagen de Docker. Asegúrate de tener las variables de entorno DOCKERHUB_USER y DOCKERHUB_PASS
+                            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKERHUB_PASS', usernameVariable: 'DOCKERHUB_USER')]) {
+                                script {
+                                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                                        docker.build("$DOCKERHUB_USER/my-app").push()
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 stage('Deploy to Kubernetes') {
                     steps {
-                        // Despliega en Kubernetes. Necesitarás un archivo de despliegue llamado 'deployment.yaml' en tu repositorio
                         container('maven') {
+                            // Despliega en Kubernetes. Necesitarás un archivo de despliegue llamado 'deployment.yaml' en tu repositorio
                             sh 'kubectl apply -f deployment.yaml'
                         }
                     }
