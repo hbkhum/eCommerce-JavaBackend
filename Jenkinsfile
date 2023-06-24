@@ -25,7 +25,6 @@ pipeline {
                     try {
                         sh 'mvn package'
                     } catch (Exception ex) {
-                        // Maneja el error de Maven Build aquí
                         error('La compilación de Maven ha fallado')
                     }
                 }
@@ -37,9 +36,8 @@ pipeline {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                             try {
-                                docker.build("${DOCKERHUB_USER}/my-app")
+                                sh 'docker build -t ${DOCKERHUB_USER}/my-app .'
                             } catch (Exception ex) {
-                                // Maneja el error de Docker Build aquí
                                 error('La compilación de Docker ha fallado')
                             }
                         }
@@ -54,7 +52,6 @@ pipeline {
                         try {
                             sh 'kubectl apply -f deployment.yaml'
                         } catch (Exception ex) {
-                            // Maneja el error de Deploy to Kubernetes aquí
                             error('El despliegue a Kubernetes ha fallado')
                         }
                     }
