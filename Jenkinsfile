@@ -32,7 +32,7 @@ pipeline {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                             docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                docker.build("my-app").push('latest')
+                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
                             }
                         }
                     }
