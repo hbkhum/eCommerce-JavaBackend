@@ -31,18 +31,16 @@ pipeline {
                 }
             }
         }
-        stage('Docker Build and Push') {
+        stage('Docker Build') {
             steps {
                 container('docker') {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                             try {
-                                docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                    docker.build("${DOCKERHUB_USER}/my-app").push('latest')
-                                }
+                                docker.build("${DOCKERHUB_USER}/my-app")
                             } catch (Exception ex) {
-                                // Maneja el error de Docker Build and Push aquí
-                                error('La compilación y el push de Docker han fallado')
+                                // Maneja el error de Docker Build aquí
+                                error('La compilación de Docker ha fallado')
                             }
                         }
                     }
