@@ -3,7 +3,7 @@ pipeline {
         kubernetes {
             // Configuración del agente de Kubernetes
             label 'kubernetes'
-            inheritFrom 'docker'
+            defaultContainer 'maven'
             yaml """
                 // Configuración YAML para el pod de Kubernetes
                 apiVersion: v1
@@ -42,12 +42,14 @@ pipeline {
         }
         stage('Maven Build') {
             steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    container('maven') {
-                        script {
-                            echo "Iniciando la etapa de Maven Build"
+                script {
+                    try {
+                        container('maven') {
                             sh 'mvn package'
                         }
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Maven Build: ${ex.getMessage()}"
+                        error("La etapa Maven Build ha fallado")
                     }
                 }
             }
@@ -67,12 +69,9 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    container('maven') {
-                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                            echo "Desplegando en Kubernetes"
-                            sh 'kubectl apply -f deployment.yaml'
-                        }
+                container('maven') {
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f deployment.yaml'
                     }
                 }
             }
