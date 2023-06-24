@@ -4,25 +4,36 @@ pipeline {
         stage('Create Namespace') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        try {
+                    try {
+                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
                             sh "kubectl get namespace kubernetesdev"
-                        } catch (Exception ex) {
-                            sh "kubectl create namespace kubernetesdev"
                         }
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Create Namespace: ${ex.getMessage()}"
+                        error("La etapa Create Namespace ha fallado")
                     }
                 }
             }
         }
         stage('Checkout') {
             steps {
-                git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
+                try {
+                    git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
+                } catch (Exception ex) {
+                    echo "Error en la etapa Checkout: ${ex.getMessage()}"
+                    error("La etapa Checkout ha fallado")
+                }
             }
         }
         stage('Maven Build') {
             steps {
                 container('maven') {
-                    sh 'mvn package'
+                    try {
+                        sh 'mvn package'
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Maven Build: ${ex.getMessage()}"
+                        error("La etapa Maven Build ha fallado")
+                    }
                 }
             }
         }
@@ -30,10 +41,15 @@ pipeline {
             steps {
                 container('docker') {
                     script {
-                        withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
+                        try {
+                            withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                                docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                    docker.build("${DOCKERHUB_USER}/my-app").push('latest')
+                                }
                             }
+                        } catch (Exception ex) {
+                            echo "Error en la etapa Docker Build and Push: ${ex.getMessage()}"
+                            error("La etapa Docker Build and Push ha fallado")
                         }
                     }
                 }
@@ -42,8 +58,13 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 container('maven') {
-                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl apply -f deployment.yaml'
+                    try {
+                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                            sh 'kubectl apply -f deployment.yaml'
+                        }
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Deploy to Kubernetes: ${ex.getMessage()}"
+                        error("La etapa Deploy to Kubernetes ha fallado")
                     }
                 }
             }
