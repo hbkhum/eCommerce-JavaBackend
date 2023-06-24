@@ -2,7 +2,7 @@ pipeline {
     agent {
         kubernetes {
             // Utiliza un pod de Kubernetes con Maven y Docker
-            label 'eCommerce-JavaBackend'
+            inheritFrom  'eCommerce-JavaBackend'
             yaml """
 apiVersion: v1
 kind: Pod
