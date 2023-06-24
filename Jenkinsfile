@@ -3,6 +3,7 @@ pipeline {
         kubernetes {
             // Configuración del agente de Kubernetes
             label 'kubernetes'
+            defaultContainer 'maven'
             yaml """
                 // Configuración YAML para el pod de Kubernetes
                 apiVersion: v1
