@@ -17,19 +17,23 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                try {
-                    git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
-                } catch (Exception ex) {
-                    echo "Error en la etapa Checkout: ${ex.getMessage()}"
-                    error("La etapa Checkout ha fallado")
+                script {
+                    try {
+                        git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Checkout: ${ex.getMessage()}"
+                        error("La etapa Checkout ha fallado")
+                    }
                 }
             }
         }
         stage('Maven Build') {
             steps {
-                container('maven') {
+                script {
                     try {
-                        sh 'mvn package'
+                        container('maven') {
+                            sh 'mvn package'
+                        }
                     } catch (Exception ex) {
                         echo "Error en la etapa Maven Build: ${ex.getMessage()}"
                         error("La etapa Maven Build ha fallado")
@@ -39,28 +43,30 @@ pipeline {
         }
         stage('Docker Build and Push') {
             steps {
-                container('docker') {
-                    script {
-                        try {
+                script {
+                    try {
+                        container('docker') {
                             withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                                 docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
                                     docker.build("${DOCKERHUB_USER}/my-app").push('latest')
                                 }
                             }
-                        } catch (Exception ex) {
-                            echo "Error en la etapa Docker Build and Push: ${ex.getMessage()}"
-                            error("La etapa Docker Build and Push ha fallado")
                         }
+                    } catch (Exception ex) {
+                        echo "Error en la etapa Docker Build and Push: ${ex.getMessage()}"
+                        error("La etapa Docker Build and Push ha fallado")
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('maven') {
+                script {
                     try {
-                        withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                            sh 'kubectl apply -f deployment.yaml'
+                        container('maven') {
+                            withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                                sh 'kubectl apply -f deployment.yaml'
+                            }
                         }
                     } catch (Exception ex) {
                         echo "Error en la etapa Deploy to Kubernetes: ${ex.getMessage()}"
