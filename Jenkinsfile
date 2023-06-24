@@ -6,9 +6,9 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
                         try {
-                            sh "kubectl get namespace kubernetes-Dev"
+                            sh "kubectl get namespace kubernetesdev"
                         } catch (Exception ex) {
-                            sh "kubectl create namespace kubernetes-Dev"
+                            sh "kubectl create namespace kubernetesdev"
                         }
                     }
                 }
