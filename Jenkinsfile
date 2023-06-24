@@ -22,7 +22,12 @@ pipeline {
         stage('Maven Build') {
             steps {
                 container('maven') {
-                    sh 'mvn package'
+                    try {
+                        sh 'mvn package'
+                    } catch (Exception ex) {
+                        // Maneja el error de Maven Build aquí
+                        error('La compilación de Maven ha fallado')
+                    }
                 }
             }
         }
@@ -31,8 +36,13 @@ pipeline {
                 container('docker') {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
+                            try {
+                                docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                    docker.build("${DOCKERHUB_USER}/my-app").push('latest')
+                                }
+                            } catch (Exception ex) {
+                                // Maneja el error de Docker Build and Push aquí
+                                error('La compilación y el push de Docker han fallado')
                             }
                         }
                     }
@@ -43,7 +53,12 @@ pipeline {
             steps {
                 container('maven') {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl apply -f /var/jenkins_home/workspace/eCommerce-JavaBackend/path/to/deployment.yaml'
+                        try {
+                            sh 'kubectl apply -f /var/jenkins_home/workspace/eCommerce-JavaBackend/path/to/deployment.yaml'
+                        } catch (Exception ex) {
+                            // Maneja el error de Deploy to Kubernetes aquí
+                            error('El despliegue a Kubernetes ha fallado')
+                        }
                     }
                 }
             }
