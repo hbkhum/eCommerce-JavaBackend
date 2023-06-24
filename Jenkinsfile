@@ -6,9 +6,9 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
                         try {
-                            sh "kubectl get namespace kubernetesdev"
+                            sh "kubectl get namespace kubernetes-dev"
                         } catch (Exception ex) {
-                            sh "kubectl create namespace kubernetesdev"
+                            sh "kubectl create namespace kubernetes-dev"
                         }
                     }
                 }
@@ -32,7 +32,7 @@ pipeline {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                             docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                                docker.build("my-app").push('latest')
+                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
                             }
                         }
                     }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 container('maven') {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        sh 'kubectl apply -f deployment.yaml'
+                        sh 'kubectl apply -f /var/jenkins_home/workspace/eCommerce-JavaBackend/path/to/deployment.yaml'
                     }
                 }
             }
