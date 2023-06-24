@@ -1,9 +1,24 @@
 pipeline {
-    agent {
-        kubernetes {
-            // Utiliza un pod de Kubernetes con Maven y Docker
-            inheritFrom  'eCommerce-JavaBackend'
-            yaml """
+    agent none
+    stages {
+        stage('Create Namespace') {
+            steps {
+                script {
+                    try {
+                        sh "kubectl get namespace kubernetes-Dev"
+                    } catch (Exception ex) {
+                        sh "kubectl create namespace kubernetes-Dev"
+                    }
+                }
+            }
+        }
+        stage('Run Pipeline') {
+            agent {
+                kubernetes {
+                    // Utiliza un pod de Kubernetes con Maven y Docker
+                    inheritFrom 'eCommerce-JavaBackend'
+                    namespace 'kubernetes-Dev'
+                    yaml """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -26,38 +41,40 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 """
-        }
-    }
-    stages {
-        stage('Checkout') {
-            steps {
-                // Clona tu repositorio
-                git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
-            }
-        }
-        stage('Build') {
-            steps {
-                // Construye tu proyecto con Maven
-                container('maven') {
-                    sh 'mvn package'
                 }
             }
-        }
-        stage('Docker Build and Push') {
-            steps {
-                // Construye y sube tu imagen de Docker. Asegúrate de tener las variables de entorno DOCKERHUB_USER y DOCKERHUB_PASS
-                container('docker') {
-                    script {
-                        docker.build("$DOCKERHUB_USER/my-app").push()
+            stages {
+                stage('Checkout') {
+                    steps {
+                        // Clona tu repositorio
+                        git 'https://github.com/hbkhum/eCommerce-JavaBackend.git'
                     }
                 }
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                // Despliega en Kubernetes. Necesitarás un archivo de despliegue llamado 'deployment.yaml' en tu repositorio
-                container('maven') {
-                    sh 'kubectl apply -f deployment.yaml'
+                stage('Build') {
+                    steps {
+                        // Construye tu proyecto con Maven
+                        container('maven') {
+                            sh 'mvn package'
+                        }
+                    }
+                }
+                stage('Docker Build and Push') {
+                    steps {
+                        // Construye y sube tu imagen de Docker. Asegúrate de tener las variables de entorno DOCKERHUB_USER y DOCKERHUB_PASS
+                        container('docker') {
+                            script {
+                                docker.build("$DOCKERHUB_USER/my-app").push()
+                            }
+                        }
+                    }
+                }
+                stage('Deploy to Kubernetes') {
+                    steps {
+                        // Despliega en Kubernetes. Necesitarás un archivo de despliegue llamado 'deployment.yaml' en tu repositorio
+                        container('maven') {
+                            sh 'kubectl apply -f deployment.yaml'
+                        }
+                    }
                 }
             }
         }
