@@ -6,9 +6,9 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
                         try {
-                            sh "kubectl get namespace kubernetes-dev"
+                            sh "kubectl get namespace kubernetes-Dev"
                         } catch (Exception ex) {
-                            sh "kubectl create namespace kubernetes-dev"
+                            sh "kubectl create namespace kubernetes-Dev"
                         }
                     }
                 }
@@ -22,23 +22,17 @@ pipeline {
         stage('Maven Build') {
             steps {
                 container('maven') {
-                    try {
-                        sh 'mvn package'
-                    } catch (Exception ex) {
-                        error('La compilación de Maven ha fallado')
-                    }
+                    sh 'mvn package'
                 }
             }
         }
-        stage('Docker Build') {
+        stage('Docker Build and Push') {
             steps {
                 container('docker') {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                            try {
-                                sh 'docker build -t ${DOCKERHUB_USER}/my-app .'
-                            } catch (Exception ex) {
-                                error('La compilación de Docker ha fallado')
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                docker.build("my-app").push('latest')
                             }
                         }
                     }
@@ -49,11 +43,7 @@ pipeline {
             steps {
                 container('maven') {
                     withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
-                        try {
-                            sh 'kubectl apply -f deployment.yaml'
-                        } catch (Exception ex) {
-                            error('El despliegue a Kubernetes ha fallado')
-                        }
+                        sh 'kubectl apply -f deployment.yaml'
                     }
                 }
             }
