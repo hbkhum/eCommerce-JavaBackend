@@ -58,3 +58,22 @@ pipeline {
                 container('docker') {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                docker.build("${DOCKERHUB_USER}/my-app").push('latest')
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('maven') {
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f deployment.yaml'
+                    }
+                }
+            }
+        }
+    }
+}
