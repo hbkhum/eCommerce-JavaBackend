@@ -4,10 +4,12 @@ pipeline {
         stage('Create Namespace') {
             steps {
                 script {
-                    try {
-                        sh "kubectl get namespace kubernetes-Dev"
-                    } catch (Exception ex) {
-                        sh "kubectl create namespace kubernetes-Dev"
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        try {
+                            sh "kubectl get namespace kubernetes-Dev"
+                        } catch (Exception ex) {
+                            sh "kubectl create namespace kubernetes-Dev"
+                        }
                     }
                 }
             }
@@ -28,7 +30,11 @@ pipeline {
             steps {
                 container('docker') {
                     script {
-                        docker.build("$DOCKERHUB_USER/my-app").push()
+                        withCredentials([usernamePassword(credentialsId: 'dockerHubCredentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+                                docker.build("my-app").push('latest')
+                            }
+                        }
                     }
                 }
             }
@@ -36,7 +42,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 container('maven') {
-                    sh 'kubectl apply -f deployment.yaml'
+                    withCredentials([file(credentialsId: 'mykubeconfig', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f deployment.yaml'
+                    }
                 }
             }
         }
