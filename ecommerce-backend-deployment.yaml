@@ -16,7 +16,7 @@ spec:
         - name: ecommerce-backend
           image: myapp:1.0
           ports:
-            - containerPort: 8080
+            - containerPort: 9444
           env:
             - name: DATABASE_URL
               value: jdbc:mysql://localhost:3306/mydatabase
@@ -40,5 +40,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 9444
   type: LoadBalancer
