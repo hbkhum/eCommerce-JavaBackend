@@ -1,44 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ecommerce-backend
+  name: my-app-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: ecommerce-backend
+      app: my-app
   template:
     metadata:
       labels:
-        app: ecommerce-backend
+        app: my-app
     spec:
       containers:
-        - name: ecommerce-backend
-          image: myapp:1.0
+        - name: my-app
+          image: my-app-image:latest
           ports:
-            - containerPort: 9444
-          env:
-            - name: DATABASE_URL
-              value: jdbc:mysql://localhost:3306/mydatabase
-          resources:
-            limits:
-              cpu: "1"
-              memory: "512Mi"
-            requests:
-              cpu: "0.5"
-              memory: "256Mi"
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: ecommerce-backend-service
-spec:
-  selector:
-    app: ecommerce-backend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 9444
-  type: LoadBalancer
+            - containerPort: 8080
