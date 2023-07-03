@@ -11,7 +11,18 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Verificar versión de Docker') {
+            steps {
+                script {
+                    def dockerVersion = sh(
+                        script: 'docker version --format \'{{.Server.Version}}\'',
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "Versión de Docker: ${dockerVersion}"
+                }
+            }
+        }
         stage('Build') {
             steps {
                 script {
