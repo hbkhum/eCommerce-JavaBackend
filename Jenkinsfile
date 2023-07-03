@@ -1,6 +1,6 @@
 def imageName = 'ecommerce-app'
 def imageTag = 'v1.0'
-def deploymentFile = 'deployment.yaml'
+def deploymentFile = 'ecommerce-backend-deployment.yaml'
 
 pipeline {
     agent any
