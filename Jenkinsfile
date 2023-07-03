@@ -1,7 +1,6 @@
 def imageName = 'ecommerce-app'
 def imageTag = 'v1.0'
 def deploymentFile = 'ecommerce-backend-deployment.yaml'
-@Library('docker') _
 
 pipeline {
     agent any
