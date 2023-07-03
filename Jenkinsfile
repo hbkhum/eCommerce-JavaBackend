@@ -14,36 +14,58 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Build the Docker image using the Dockerfile
                 script {
-                    dockerImage = docker.build("${imageName}:${imageTag}", '-f Dockerfile .')
+                    try {
+                        echo 'Building the Docker image...'
+                        dockerImage = docker.build("${imageName}:${imageTag}", '-f Dockerfile .')
+                    } catch (Exception e) {
+                        echo "Error during the build stage: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
 
         stage('Test') {
             steps {
-                // Run tests on the Docker image
                 script {
-                    docker.run("--rm ${dockerImage.id}", "mvn test")
+                    try {
+                        echo 'Running tests on the Docker image...'
+                        docker.run("--rm ${dockerImage.id}", "mvn test")
+                    } catch (Exception e) {
+                        echo "Error during the test stage: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
 
         stage('Package') {
             steps {
-                // Package the application in the Docker image
                 script {
-                    docker.run("--rm ${dockerImage.id}", "mvn package")
+                    try {
+                        echo 'Packaging the application in the Docker image...'
+                        docker.run("--rm ${dockerImage.id}", "mvn package")
+                    } catch (Exception e) {
+                        echo "Error during the package stage: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                // Deploy the application using the deployment.yaml file
-                sh "sed -i 's|${imageName}:${imageTag}|${imageName}:${imageTag}|' ${deploymentFile}"
-                sh "kubectl apply -f ${deploymentFile}"
+                script {
+                    try {
+                        echo 'Deploying the application...'
+                        sh "sed -i 's|${imageName}:${imageTag}|${imageName}:${imageTag}|' ${deploymentFile}"
+                        sh "kubectl apply -f ${deploymentFile}"
+                    } catch (Exception e) {
+                        echo "Error during the deploy stage: ${e.getMessage()}"
+                        throw e
+                    }
+                }
             }
         }
     }
