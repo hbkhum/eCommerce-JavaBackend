@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: my-app-role
+  namespace: eCommerce-JavaBackend
+rules:
+- apiGroups: [""] # API de recursos de Kubernetes
+  resources: ["pods", "services", "deployments"] # Recursos específicos
+  verbs: ["get", "list", "watch", "create", "update", "delete"] # Acciones permitidas
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: my-app-rolebinding
+  namespace: eCommerce-JavaBackend
+subjects:
+- kind: User # Puedes usar "ServiceAccount" si Jenkins utiliza una cuenta de servicio
+  name: jenkins-user # Nombre de la cuenta de servicio o usuario utilizado por Jenkins
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: my-app-role
+  apiGroup: rbac.authorization.k8s.io
