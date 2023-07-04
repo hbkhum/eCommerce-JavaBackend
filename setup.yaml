@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecommerce-javabackend
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-user
+  namespace: ecommerce-javabackend
