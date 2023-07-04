@@ -43,7 +43,7 @@ pipeline {
                 script {
                     try {
                         echo 'Running tests on the Docker image...'
-                        sh "docker run --rm -v $(pwd):/example1 ${dockerImage.id} mvn -f /example1/pom.xml test"
+                        sh "docker run --rm -v \$(pwd):/example1 ${dockerImage.id} mvn -f /example1/pom.xml test"
                     } catch (Exception e) {
                         echo "Error during the test stage: ${e.getMessage()}"
                         throw e
