@@ -43,7 +43,7 @@ pipeline {
                 script {
                     try {
                         echo 'Running tests on the Docker image...'
-                        docker.run("--rm ${dockerImage.id}", "mvn test")
+                        sh "docker run --rm ${dockerImage.id} mvn test"
                     } catch (Exception e) {
                         echo "Error during the test stage: ${e.getMessage()}"
                         throw e
@@ -51,13 +51,13 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Package') {
             steps {
                 script {
                     try {
                         echo 'Packaging the application in the Docker image...'
-                        docker.run("--rm ${dockerImage.id}", "mvn package")
+                        sh "docker run --rm ${dockerImage.id} mvn package"
                     } catch (Exception e) {
                         echo "Error during the package stage: ${e.getMessage()}"
                         throw e
