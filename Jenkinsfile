@@ -5,8 +5,21 @@ def dockerImage
 
 pipeline {
     agent any
-
+    
     stages {
+        stage('Setup') {
+            steps {
+                script {
+                    try {
+                        // Aplicar configuraciones iniciales del clúster de Kubernetes
+                        sh "kubectl apply -f setup.yaml"
+                    } catch (Exception e) {
+                        echo "Error during the setup stage: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+        }        
         stage('Checkout') {
             steps {
                 checkout scm
