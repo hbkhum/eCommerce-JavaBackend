@@ -7,6 +7,20 @@ pipeline {
     agent any
     
     stages {
+        
+        stage('Preparation') {
+            steps {
+                script {
+                    try {
+                        sh "kubectl config use-context minikube" // Reemplaza <tu-contexto> con el nombre de tu contexto de Kubernetes
+                    } catch (Exception e) {
+                        echo "Error during preparation stage: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+        }
+        
         stage('Setup') {
             steps {
                 script {
@@ -19,7 +33,8 @@ pipeline {
                     }
                 }
             }
-        }        
+        }
+        
         stage('Checkout') {
             steps {
                 checkout scm
