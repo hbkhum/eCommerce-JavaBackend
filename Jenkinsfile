@@ -57,7 +57,7 @@ pipeline {
                 script {
                     try {
                         echo 'Packaging the application in the Docker image...'
-                        sh "docker run --rm ${dockerImage.id} mvn package"
+                        sh "docker run --rm -v \$(pwd):/example1 ${dockerImage.id} mvn -f /example1/pom.xml package"
                     } catch (Exception e) {
                         echo "Error during the package stage: ${e.getMessage()}"
                         throw e
