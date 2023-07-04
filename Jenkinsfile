@@ -68,7 +68,7 @@ pipeline {
         
         stage('Apply Role and Binding') {
             steps {
-                sh "kubectl apply -f kubernetes/my-app-role.yaml"
+                sh "kubectl apply -f my-app-role.yaml"
             }
         }
         
