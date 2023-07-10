@@ -12,6 +12,26 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Check Namespace') {
+            steps {
+                script {
+                    def namespace = 'eCommerce-JavaBackend'
+                    def namespaceExists = sh(
+                        script: "kubectl get namespace ${namespace}",
+                        returnStatus: true
+                    ) == 0
+                    
+                    if (!namespaceExists) {
+                        sh "kubectl create namespace ${namespace}"
+                        echo "Namespace ${namespace} created"
+                    } else {
+                        echo "Namespace ${namespace} already exists"
+                    }
+                }
+            }
+        }
+        
         stage('Verificar versión de Docker') {
             steps {
                 script {
