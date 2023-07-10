@@ -78,7 +78,7 @@ pipeline {
                 script {
                     try {
                         echo 'Deploying the application...'
-                        sh "sed -i 's|${imageName}:${imageTag}|${imageName}:${imageTag}|' ${deploymentFile}"
+                        sh "sed -i 's|ecommerce-app:v1.0|${imageName}:${imageTag}|' ${deploymentFile}"
                         sh "kubectl apply -f ${deploymentFile} -n ecommerce-javabackend" // Agrega el flag -n para especificar el namespace
                     } catch (Exception e) {
                         echo "Error during the deploy stage: ${e.getMessage()}"
