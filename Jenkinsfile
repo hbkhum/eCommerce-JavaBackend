@@ -37,6 +37,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Apply Role and Binding') {
+            steps {
+                script {
+                    try {
+                        echo 'Applying Role and Binding...'
+                        sh "kubectl apply -f my-app-role.yaml"
+                    } catch (Exception e) {
+                        echo "Error during applying Role and Binding: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+        }
+        
         
         stage('Deploy') {
             steps {
