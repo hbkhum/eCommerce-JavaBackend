@@ -58,7 +58,21 @@ pipeline {
                 }
             }
         }
-               
+
+        stage('Package') {
+            steps {
+                script {
+                    try {
+                        echo 'Packaging the application...'
+                        sh 'mvn package'
+                    } catch (Exception e) {
+                        echo "Error during the package stage: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+        }       
+        
         stage('Deploy') {
             steps {
                 script {
