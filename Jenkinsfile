@@ -37,47 +37,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Test') {
-            steps {
-                script {
-                    try {
-                        echo 'Running tests on the Docker image...'
-                        sh "docker run --rm -v \$(pwd):/example1 ${dockerImage.id} mvn -f /example1/pom.xml test"
-                    } catch (Exception e) {
-                        echo "Error during the test stage: ${e.getMessage()}"
-                        throw e
-                    }
-                }
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                script {
-                    try {
-                        echo 'Packaging the application in the Docker image...'
-                        sh "docker run --rm -v \$(pwd):/example1 ${dockerImage.id} mvn -f /example1/pom.xml package"
-                    } catch (Exception e) {
-                        echo "Error during the package stage: ${e.getMessage()}"
-                        throw e
-                    }
-                }
-            }
-        }
-        
-        stage('Apply Role and Binding') {
-            steps {
-                script {
-                    try {
-                        sh "kubectl apply -f my-app-role.yaml"
-                    } catch (Exception e) {
-                        echo "Error during applying Role and Binding: ${e.getMessage()}"
-                        throw e
-                    }
-                }
-            }
-        }
         
         stage('Deploy') {
             steps {
