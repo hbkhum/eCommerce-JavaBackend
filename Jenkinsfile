@@ -16,7 +16,7 @@ pipeline {
         stage('Check Namespace') {
             steps {
                 script {
-                    def namespace = 'eCommerce-JavaBackend'
+                    def namespace = 'ecommerce-javabackend'
                     def namespaceExists = sh(
                         script: "kubectl get namespace ${namespace}",
                         returnStatus: true
