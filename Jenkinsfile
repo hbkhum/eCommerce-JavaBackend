@@ -58,7 +58,7 @@ pipeline {
             }
         }
 
-        stage('Apply Role and Binding') {
+        /*stage('Apply Role and Binding') {
             steps {
                 script {
                     try {
@@ -70,7 +70,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
         
         
         stage('Deploy') {
