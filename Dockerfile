@@ -18,7 +18,7 @@ FROM maven:3.8.1-jdk-8
 WORKDIR /example1
 
 # copy over the built artifact from the maven image
-COPY --from=build /app/target/*.jar ./
+COPY --from=build /app/target/*.jar ./example1-1.0.jar
 
 # set the startup command to run your binary
 CMD ["java", "-jar", "example1-1.0.jar"]
