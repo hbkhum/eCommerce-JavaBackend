@@ -13,19 +13,19 @@ pipeline {
             }
         }
 
-        stage('Delete Images') {
-            steps {
-                script {
-                    try {
-                        echo 'Deleting all images with the tag ecommerce-app:v1.0...'
-                        sh 'docker rmi $(docker images ecommerce-app:v1.0 -q) --force'
-                    } catch (Exception e) {
-                        echo "Error during the image deletion stage: ${e.getMessage()}"
-                        throw e
-                    }
-                }
-            }
-        }    
+        // stage('Package') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo 'Packaging the application...'
+        //                 sh 'mvn package'
+        //             } catch (Exception e) {
+        //                 echo "Error during the package stage: ${e.getMessage()}"
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // } 
 
         stage('Delete Pods') {
             steps {
