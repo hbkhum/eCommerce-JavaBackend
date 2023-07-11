@@ -15,5 +15,6 @@ spec:
       containers:
         - name: my-app
           image: ecommerce-app:v1.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 9444
