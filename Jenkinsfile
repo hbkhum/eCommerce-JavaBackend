@@ -59,21 +59,7 @@ pipeline {
                 }
             }
         }    
-
-        stage('Maven Build') {
-            steps {
-                script {
-                    try {
-                        echo 'Running Maven build...'
-                        sh 'mvn clean install'
-                    } catch (Exception e) {
-                        echo "Error during the Maven build stage: ${e.getMessage()}"
-                        throw e
-                    }
-                }
-            }
-        }
-        
+       
         stage('Build') {
             steps {
                 script {
