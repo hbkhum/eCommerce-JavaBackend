@@ -13,19 +13,19 @@ pipeline {
             }
         }
 
-        stage('Delete Pods') {
+        stage('Delete Images') {
             steps {
                 script {
                     try {
-                        // Borra los pods del namespace específico
-                        sh 'kubectl delete pods --all -n ecommerce-javabackend'
+                        echo 'Deleting all images with the tag ecommerce-app:v1.0...'
+                        sh 'docker rmi $(docker images ecommerce-app:v1.0 -q) --force'
                     } catch (Exception e) {
-                        echo "Error al eliminar los pods: ${e.getMessage()}"
+                        echo "Error during the image deletion stage: ${e.getMessage()}"
                         throw e
                     }
                 }
             }
-        }        
+        }    
 
         stage('Delete Pods') {
             steps {
