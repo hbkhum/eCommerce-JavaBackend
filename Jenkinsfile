@@ -25,6 +25,20 @@ pipeline {
                     }
                 }
             }
+        }        
+
+        stage('Delete Pods') {
+            steps {
+                script {
+                    try {
+                        // Borra los pods del namespace específico
+                        sh 'kubectl delete pods --all -n ecommerce-javabackend'
+                    } catch (Exception e) {
+                        echo "Error al eliminar los pods: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
         }
         
         stage('Check Namespace') {
