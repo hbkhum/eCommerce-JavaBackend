@@ -22,3 +22,4 @@ COPY --from=build /app/target/*.jar ./example1-1.0.jar
 
 # set the startup command to run your binary
 CMD ["java", "-jar", "example1-1.0.jar"]
+
