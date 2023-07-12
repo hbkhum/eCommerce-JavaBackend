@@ -19,15 +19,26 @@ pipeline {
             steps {
                 script {
                     try {
-                        // Borra los pods del namespace específico
-                        sh 'kubectl delete pods --all -n ecommerce-javabackend'
+                        // Comprueba si existen los pods en el namespace específico
+                        def podExists = sh(
+                            script: 'kubectl get pods --namespace=ecommerce-javabackend',
+                            returnStatus: true
+                        ) == 0
+        
+                        if (podExists) {
+                            sh 'kubectl delete pods --all -n ecommerce-javabackend --ignore-not-found'
+                            echo 'Pods deleted'
+                        } else {
+                            echo 'No pods found, skipping deletion'
+                        }
                     } catch (Exception e) {
-                        echo "Error al eliminar los pods: ${e.getMessage()}"
+                        echo "Error deleting pods: ${e.getMessage()}"
                         throw e
                     }
                 }
             }
         }
+
         
         stage('Check Namespace') {
             steps {
