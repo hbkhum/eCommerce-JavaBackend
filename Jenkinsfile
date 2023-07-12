@@ -54,6 +54,12 @@ pipeline {
                     try {
                         echo 'Building the Docker image...'
                         dockerImage = docker.build("${imageName}:${imageTag}", '-f Dockerfile .')
+                        
+                        echo 'Tagging the Docker image...'
+                        sh "docker tag ${imageName}:${imageTag} localhost:5000/${imageName}:${imageTag}"
+                        
+                        echo 'Saving the Docker image...'
+                        sh "docker save -o ecommerce-app.tar localhost:5000/${imageName}:${imageTag}"
                     } catch (Exception e) {
                         echo "Error during the build stage: ${e.getMessage()}"
                         throw e
