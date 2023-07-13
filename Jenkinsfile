@@ -48,16 +48,17 @@ pipeline {
                         script: "kubectl get namespace ${namespace}",
                         returnStatus: true
                     ) == 0
-                    
-                    if (!namespaceExists) {
-                        sh "kubectl create namespace ${namespace}"
-                        echo "Namespace ${namespace} created"
-                    } else {
-                        echo "Namespace ${namespace} already exists"
+        
+                    if (namespaceExists) {
+                        sh "kubectl delete namespace ${namespace}"
+                        echo "Namespace ${namespace} deleted"
                     }
+        
+                    sh "kubectl create namespace ${namespace}"
+                    echo "Namespace ${namespace} created"
                 }
             }
-        }    
+        }
        
         stage('Build') {
             steps {
