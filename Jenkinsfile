@@ -119,7 +119,7 @@ pipeline {
                 script {
                     try {
                         echo 'Applying Metallb Config...'
-                        sh "kubectl apply -f metallb-config.yaml"
+                        sh "kubectl apply -f metallb-config.yaml -n ecommerce-javabackend"
                     } catch (Exception e) {
                         echo "Error applying Metallb Config: ${e.getMessage()}"
                         throw e
