@@ -29,5 +29,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 9444
+      targetPort: 9444
+      nodePort: 30000  # Elige un número de puerto válido
   selector:
     app: ecommerce-java-backend
