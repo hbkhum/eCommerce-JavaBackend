@@ -102,13 +102,9 @@ pipeline {
                         sh "sed -i 's|ecommerce-app:v1.0|${imageName}:${imageTag}|' ${deploymentFile}"
                         sh "kubectl apply -f ${deploymentFile} -n ecommerce-javabackend"
         
-                        echo 'Configurar el reenvío de puertos'
-                        def portForwardCmd = "kubectl port-forward --namespace ecommerce-javabackend service/ecommerce-java-backend 9444:9444 --address 0.0.0.0"
-                        def portForwardProc = portForwardCmd.execute()
+                        // Configurar el reenvío de puertos
+                        sh "kubectl port-forward --namespace ecommerce-javabackend service/ecommerce-java-backend 9444:9444 --address 0.0.0.0 &"
                         sleep 10 // Esperar un momento para que el reenvío de puertos se establezca correctamente
-        
-                        echo 'Detener el reenvío de puertos al finalizar'
-                        portForwardProc.destroy()
         
                     } catch (Exception e) {
                         echo "Error during the deploy stage: ${e.getMessage()}"
