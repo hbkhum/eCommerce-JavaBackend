@@ -103,8 +103,8 @@ pipeline {
                         sh "kubectl apply -f ${deploymentFile} -n ecommerce-javabackend"
         
                         // Configurar el reenvío de puertos
-                        sh "kubectl port-forward --namespace ecommerce-javabackend service/ecommerce-java-backend 9444:9444 --address 0.0.0.0 &"
-                        sleep 10 // Esperar un momento para que el reenvío de puertos se establezca correctamente
+                        //sh "kubectl port-forward --namespace ecommerce-javabackend service/ecommerce-java-backend 9444:9444 --address 0.0.0.0 &"
+                        //sleep 10 // Esperar un momento para que el reenvío de puertos se establezca correctamente
         
                     } catch (Exception e) {
                         echo "Error during the deploy stage: ${e.getMessage()}"
