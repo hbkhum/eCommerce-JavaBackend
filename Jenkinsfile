@@ -60,7 +60,7 @@ pipeline {
             }
         }
 
-        stage('Setup Minikube Docker Env') {
+        stage('Setup Minikube Docker Env11') {
           steps {
             sh 'eval $(minikube -p minikube docker-env)'
           }
