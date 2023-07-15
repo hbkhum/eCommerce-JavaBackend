@@ -59,18 +59,35 @@ pipeline {
                 }
             }
         }
+
+        stage('Setup Minikube Docker Env') {
+          steps {
+            script {
+              // Obtener la configuración del entorno de Docker desde Minikube
+              def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
+        
+              // Parsear las líneas de la salida y extraer las variables de entorno
+              def envVars = [:]
+              dockerEnv.eachLine { line ->
+                if (line.startsWith("export")) {
+                  def parts = line.substring(7).trim().split('=')
+                  envVars[parts[0].trim()] = parts[1].trim()
+                }
+              }
+        
+              // Configurar las variables de entorno en el contexto del build
+              withEnv(envVars) {
+                echo "Entorno de Docker configurado con éxito"
+              }
+            }
+          }
+        }        
        
         stage('Build') {
             steps {
                 script {
                     try {
-                          def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
-                          def envVars = [:]
-                    
-                          // Extraer las variables de entorno del resultado
-                          dockerEnv.eachLine { line ->
-                            def parts = line.split('=')
-                            envVars[parts[0].trim()] = parts[1].trim()
+
                         
                         
                         echo 'Building the Docker image...'
