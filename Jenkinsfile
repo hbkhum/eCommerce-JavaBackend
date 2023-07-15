@@ -62,8 +62,8 @@ pipeline {
 
         stage('Setup Minikube Docker Env') {
           steps {
-            script {
-              try {
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+              script {
                 // Obtener la configuración del entorno de Docker desde Minikube
                 def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
         
@@ -80,15 +80,11 @@ pipeline {
                 withEnv(envVars) {
                   echo "Entorno de Docker configurado con éxito"
                 }
-              } catch (Exception e) {
-                echo "Error al configurar el entorno de Docker: ${e.message}"
-                // Puedes agregar aquí cualquier otra acción de manejo de errores que desees
-                // Por ejemplo, puedes marcar la construcción como fallida con 'error true'
-                error "Error al configurar el entorno de Docker"
               }
             }
           }
         }
+
        
         stage('Build') {
             steps {
