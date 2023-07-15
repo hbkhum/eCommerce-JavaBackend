@@ -61,29 +61,30 @@ pipeline {
         }
 
         stage('Setup Minikube Docker Env') {
-          steps {
-            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              script {
-                // Obtener la configuración del entorno de Docker desde Minikube
-                def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
+            steps {
+                script {
+                    // Obtener la configuración del entorno de Docker desde Minikube
+                    def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
         
-                // Parsear las líneas de la salida y extraer las variables de entorno
-                def envVars = [:]
-                dockerEnv.eachLine { line ->
-                  if (line.startsWith("export")) {
-                    def parts = line.substring(7).trim().split('=')
-                    envVars[parts[0].trim()] = parts[1].trim()
-                  }
-                }
+                    // Parsear las líneas de la salida y extraer las variables de entorno
+                    def envVars = [:]
+                    dockerEnv.eachLine { line ->
+                        if (line.startsWith("export")) {
+                            def parts = line.split(' ')[1].split('=')
+                            envVars[parts[0]] = parts[1].replaceAll('"', '')
+                        }
+                    }
         
-                // Configurar las variables de entorno en el contexto del build
-                withEnv(envVars) {
-                  echo "Entorno de Docker configurado con éxito"
+                    // Configurar las variables de entorno en el contexto del build
+                    envVars.each { key, value ->
+                        env."${key}" = value
+                    }
+        
+                    echo "Entorno de Docker configurado con éxito"
                 }
-              }
             }
-          }
         }
+
 
        
         stage('Build') {
