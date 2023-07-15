@@ -59,17 +59,20 @@ pipeline {
                 }
             }
         }
-
-        stage('Setup Docker Env') {
-          steps {
-            sh 'eval \$(minikube -p minikube docker-env)'
-          }
-        }
        
         stage('Build') {
             steps {
                 script {
                     try {
+                          def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
+                          def envVars = [:]
+                    
+                          // Extraer las variables de entorno del resultado
+                          dockerEnv.eachLine { line ->
+                            def parts = line.split('=')
+                            envVars[parts[0].trim()] = parts[1].trim()
+                        
+                        
                         echo 'Building the Docker image...'
                         dockerImage = docker.build("${imageName}:${imageTag}", '-f Dockerfile .')
                         
