@@ -63,25 +63,32 @@ pipeline {
         stage('Setup Minikube Docker Env') {
           steps {
             script {
-              // Obtener la configuración del entorno de Docker desde Minikube
-              def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
+              try {
+                // Obtener la configuración del entorno de Docker desde Minikube
+                def dockerEnv = sh(script: 'minikube -p minikube docker-env', returnStdout: true).trim()
         
-              // Parsear las líneas de la salida y extraer las variables de entorno
-              def envVars = [:]
-              dockerEnv.eachLine { line ->
-                if (line.startsWith("export")) {
-                  def parts = line.substring(7).trim().split('=')
-                  envVars[parts[0].trim()] = parts[1].trim()
+                // Parsear las líneas de la salida y extraer las variables de entorno
+                def envVars = [:]
+                dockerEnv.eachLine { line ->
+                  if (line.startsWith("export")) {
+                    def parts = line.substring(7).trim().split('=')
+                    envVars[parts[0].trim()] = parts[1].trim()
+                  }
                 }
-              }
         
-              // Configurar las variables de entorno en el contexto del build
-              withEnv(envVars) {
-                echo "Entorno de Docker configurado con éxito"
+                // Configurar las variables de entorno en el contexto del build
+                withEnv(envVars) {
+                  echo "Entorno de Docker configurado con éxito"
+                }
+              } catch (Exception e) {
+                echo "Error al configurar el entorno de Docker: ${e.message}"
+                // Puedes agregar aquí cualquier otra acción de manejo de errores que desees
+                // Por ejemplo, puedes marcar la construcción como fallida con 'error true'
+                error "Error al configurar el entorno de Docker"
               }
             }
           }
-        }        
+        }
        
         stage('Build') {
             steps {
