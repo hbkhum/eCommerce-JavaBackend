@@ -60,14 +60,11 @@ pipeline {
             }
         }
 
-        stage('Get Minikube IP') {
+        stage('Setup Docker Env') {
           steps {
-            script {
-              def minikubeIP = sh(script: 'minikube ip', returnStdout: true).trim()
-              echo "Minikube IP: ${minikubeIP}"
-            }
+            sh 'eval \$(minikube -p minikube docker-env)'
           }
-        }  
+        }
        
         stage('Build') {
             steps {
