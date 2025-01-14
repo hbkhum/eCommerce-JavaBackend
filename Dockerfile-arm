@@ -1,0 +1,32 @@
+# Base build image compatible con ARM
+FROM arm32v7/ubuntu:20.04 as build
+
+# Instalar OpenJDK y Maven
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk maven
+
+# Set working directory
+WORKDIR /app
+
+# Copy the project files
+COPY ./pom.xml ./pom.xml
+COPY ./src ./src
+
+# Build for release
+RUN mvn clean package
+
+# Final base image también compatible con ARM
+FROM arm32v7/ubuntu:20.04
+
+# Install OpenJDK for runtime
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jre-headless
+
+# Set deployment directory
+WORKDIR /example1
+
+# Copy over the built artifact from the build stage
+COPY --from=build /app/target/*.jar ./example1-1.0.jar
+
+# Set the startup command to run your binary
+CMD ["java", "-jar", "example1-1.0.jar"]

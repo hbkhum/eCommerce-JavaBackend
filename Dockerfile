@@ -15,11 +15,10 @@ RUN mvn clean package
 FROM maven:3.8.1-jdk-8
 
 # set deployment directory
-WORKDIR /example1
+WORKDIR /eCommerce
 
 # copy over the built artifact from the maven image
-COPY --from=build /app/target/*.jar ./example1-1.0.jar
+COPY --from=build /app/target/*.jar ./eCommerce-1.0.jar
 
 # set the startup command to run your binary
-CMD ["java", "-jar", "example1-1.0.jar"]
-
+CMD ["java", "-jar", "eCommerce-1.0.jar"]
